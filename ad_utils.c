@@ -51,7 +51,7 @@ char **ad_utils_split_str(const char *str, const char *delimiters)
     token = strtok(src, delimiters);
     tokens[0] = token;
 
-    for(i = 0; token = strtok(NULL, delimiters); i++)
+    for(i = 1; token = strtok(NULL, delimiters); i++)
     {
         tokens = realloc(tokens, sizeof(char *) * (i + 2));
 

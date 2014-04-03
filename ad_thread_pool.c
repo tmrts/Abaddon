@@ -61,7 +61,6 @@ int ad_thread_pool_get_thread_count(ad_thread_pool *thread_pool)
 
 void ad_thread_pool_destruct(ad_thread_pool *thread_pool)
 {
-
     while(ad_thread_pool_delete_thread(thread_pool));
 
     ad_queue_destruct(THREAD_QUEUE(thread_pool));

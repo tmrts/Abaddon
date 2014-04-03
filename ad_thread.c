@@ -15,56 +15,50 @@ void ad_thread_cancel_cleanup(void *mutex)
 
 void ad_thread_handle_requests_hook(ad_thread_request *request)
 {
-    int jmp_status;
     jmp_buf error_jmp;
+    int jmp_status;
+
+    int client = VOIDPTR_TO_INT(request);
+    free(request);
 
     /* Simulating try catch */
     jmp_status = setjmp(error_jmp);
 
-    if(jmp_status != 1) {ad_server_answer(VOIDPTR_TO_INT(request), error_jmp);}
-
-    free(request);
+    if(jmp_status != 1) {ad_server_answer(client, error_jmp);}
 }
 
 void *ad_thread_handle_requests(void *thread_parameters)
 {
-    void *request;
-    ad_thread_parameters *parameters = (ad_thread_parameters *) thread_parameters;
+    void *request = NULL;
+    ad_queue_mutex *queue_mutex = MUTEX((ad_thread_parameters *) thread_parameters);
+    ad_queue_cond *queue_cond   = COND((ad_thread_parameters *) thread_parameters);
+    ad_queue *request_queue     = REQUEST_QUEUE((ad_thread_parameters *) thread_parameters);
+    free(thread_parameters);
 
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
     pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 
-    pthread_cleanup_push(ad_thread_cancel_cleanup, (void *) MUTEX(parameters));
+    pthread_cleanup_push(ad_thread_cancel_cleanup, (void *) queue_mutex);
 
-    pthread_mutex_lock(MUTEX(parameters));
+    pthread_mutex_lock(queue_mutex);
 
     for ( ; ; )
     {
-        request = ad_queue_pop(REQUEST_QUEUE(parameters));
+        request = ad_queue_pop(request_queue);
 
         if (request)
         {
             /* Let other threads access the request queue while handling a request */
-            pthread_mutex_unlock(MUTEX(parameters));
+            pthread_mutex_unlock(queue_mutex);
 
             /* Hook can be changed easily to be used in different setups */
             ad_thread_handle_requests_hook(request);
 
-            pthread_mutex_lock(MUTEX(parameters));
+            pthread_mutex_lock(queue_mutex);
         }
         else
         {
-            if (ad_server_is_terminating())
-            {
-                pthread_mutex_unlock(MUTEX(parameters));
-
-                free(parameters);
-                pthread_exit(NULL);
-            }
-            else 
-            {
-                pthread_cond_wait(COND(parameters), MUTEX(parameters));
-            }
+            pthread_cond_wait(queue_cond, queue_mutex);
         }
     }
 

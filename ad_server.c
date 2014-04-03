@@ -42,23 +42,28 @@ void ad_server_answer(int client_socket, jmp_buf error_jmp)
     char path[512];
     char buffer[4096];
     ssize_t bytes_received, bytes_sent;
-    ad_http_request *http_request = malloc(sizeof(ad_http_request));
+    ad_http_request http_request = {
+        .method  = NULL,
+        .uri     = NULL,
+        .version = NULL,
+        .headers = NULL
+    };
 
     ad_response_receive(client_socket, buffer, 4096, error_jmp);
 
-    ad_http_request_parse(http_request, buffer);
+    ad_http_request_parse(&http_request, buffer);
 
-    if(http_request == NULL || METHOD(http_request) == NULL || !ad_method_is_valid(METHOD(http_request)))
+    if(METHOD(&http_request) == NULL || !ad_method_is_valid(METHOD(&http_request)))
     {
         ad_response_send(client_socket, AD_RESPONSE_CLIENT_BAD_REQUEST, error_jmp);
     }
-    else if(strcasecmp(METHOD(http_request), "GET"))
+    else if(strcasecmp(METHOD(&http_request), "GET"))
     {
         ad_response_send(client_socket, AD_RESPONSE_SERVER_NOT_IMPLEMENTED, error_jmp);
     }
-    else if(!strcasecmp(METHOD(http_request),"GET"))
+    else if(!strcasecmp(METHOD(&http_request),"GET"))
     {
-        sprintf(path, "htdocs%s", URI(http_request));
+        sprintf(path, "htdocs%s", URI(&http_request));
         if(ad_utils_is_directory(path))
         {
             strcat(path, "index.html");
@@ -73,8 +78,9 @@ void ad_server_answer(int client_socket, jmp_buf error_jmp)
             ad_response_send(client_socket, AD_RESPONSE_HTTP_OK, error_jmp);
 
             ad_response_sendfile(client_socket, requested_file, error_jmp);
+
+            close(requested_file);
         }
-        close(requested_file);
     }
 
     shutdown(client_socket, SHUT_WR);
@@ -83,7 +89,6 @@ void ad_server_answer(int client_socket, jmp_buf error_jmp)
 
     close(client_socket);
 
-    ad_http_request_free(http_request);
 }
 
 
@@ -110,6 +115,7 @@ int ad_server_listen(unsigned short int server_port)
     signal(SIGPIPE, SIG_IGN);
 
     /* system calls (e.g. accept()) are restarted when we use sigaction */
+    sigemptyset(&sig_struct.sa_mask);
     sig_struct.sa_handler = ad_server_terminate;
     sig_struct.sa_flags = 0;
     sigaction(SIGINT, &sig_struct, NULL);
@@ -129,7 +135,7 @@ int ad_server_listen(unsigned short int server_port)
     bind(server_socket, (struct sockaddr *) &server_addr, server_len);
 
     listen(server_socket, AD_SERVER_CONNECTION_BACKLOG);
-    printf("Abaddon HTTP server is running on port %d\n", server_port);
+    printf("Abaddon HTTP server is listening on port %d\n", server_port);
 
     while (!ad_server_terminating)
     {
@@ -153,7 +159,6 @@ int ad_server_listen(unsigned short int server_port)
         }
     }
     close(server_socket);
-    free(client_ptr);
 
     ad_queue_destruct(request_queue);
     ad_thread_pool_destruct(thread_pool);

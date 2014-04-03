@@ -65,24 +65,15 @@ void *ad_queue_pop(ad_queue *queue)
 
     pthread_mutex_unlock(MUTEX(queue));
 
-    if(node)
-    {
-        data = DATA(node);
-        free(node);
-    }
+    data = node ? DATA(node) : NULL;
+    free(node);
 
     return data;
 }
 
 int ad_queue_get_node_count(ad_queue *queue)
 {
-    int node_count;
-
-    pthread_mutex_lock(MUTEX(queue));
-    node_count = NODE_COUNT(queue);
-    pthread_mutex_unlock(MUTEX(queue));
-
-    return node_count;
+    return NODE_COUNT(queue);
 }
 
 void ad_queue_destruct(ad_queue *queue)

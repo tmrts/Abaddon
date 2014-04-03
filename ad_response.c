@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/sendfile.h>
@@ -19,7 +20,8 @@ void ad_response_send(int client, char *response, jmp_buf error_jmp)
         bytes_sent = send(client, response, strlen(response), MSG_NOSIGNAL);
         if (bytes_sent == -1) 
         {
-            perror("Client Error"); 
+            perror("ad_response_send"); 
+            close(client);
             longjmp(error_jmp, 1);
         }
         bytes_left -= bytes_sent;
@@ -37,32 +39,30 @@ void ad_response_sendfile(int client, int file, jmp_buf error_jmp)
     file_size = file_info.st_size;
     bytes_left = file_size;
 
-    while(bytes_sent)
+    while(bytes_left)
     {
         bytes_sent = sendfile(client, file, &offset, file_size);
         if (bytes_sent == -1) 
         {
-            perror("Client Error"); 
+            perror("ad_response_sendfile"); 
+            close(client);
+            close(file);
             longjmp(error_jmp, 1);
         }
         offset += bytes_sent;
+        bytes_left -= bytes_sent;
     }
 }
 
 void ad_response_receive(int client, char *buff, size_t buff_len, jmp_buf error_jmp) 
 {
-    char *destination = buff;
-    ssize_t bytes_received = 1;
+    ssize_t bytes_received;
 
-    while(bytes_received)
+    bytes_received = recv(client, buff, buff_len, MSG_NOSIGNAL);
+    if (bytes_received == -1)
     {
-        bytes_received = recv(client, destination, buff_len, MSG_NOSIGNAL);
-        if (bytes_received == -1)
-        {
-            perror("Client Error");
-            longjmp(error_jmp, 1);
-        }
-        destination += bytes_received;
-        buff_len -= bytes_received;
+        perror("ad_response_receive");
+        close(client);
+        longjmp(error_jmp, 1);
     }
 }
