@@ -1,0 +1,19 @@
+The following is a list of goals to be accomplished for Abaddon.
+
+[HTTP Support]
+    + Implement the remaining HTTP methods.
+    + Include HTTP/1.1 & HTTP/0.9 support.
+
+[HTTP Server]
+    + Change the thread pool pattern to reactor pattern.
+
+[Logging]
+    + Implement internal event-logging.
+
+[Tests]
+    + Clean unit-tests for production.
+    + Develop automated load-tests.
+
+[Deployment]
+    + Implement configuration support.
+
