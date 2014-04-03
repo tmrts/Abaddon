@@ -5,6 +5,11 @@
 #include "ad_thread.h"
 #include "ad_server.h"
 
+/* Makes the necessary cleaning operations of the thread
+ * if the thread is canceled.
+ *
+ * @param mutex the mutex that is used by the thread
+ */
 void ad_thread_cancel_cleanup(void *mutex)
 {
     if (mutex)
@@ -13,6 +18,10 @@ void ad_thread_cancel_cleanup(void *mutex)
     }
 }
 
+/* Is used for extending the tasks during request handling.
+ *
+ * @param request the pointer of the request to be handled.
+ */
 void ad_thread_handle_requests_hook(ad_thread_request *request)
 {
     jmp_buf error_jmp;
@@ -27,6 +36,12 @@ void ad_thread_handle_requests_hook(ad_thread_request *request)
     if(jmp_status != 1) {ad_server_answer(client, error_jmp);}
 }
 
+/* Locks the mutex of the given queue pops a request
+ * and handles the request. Yields the CPU when there are no
+ * requests in the request queue
+ *
+ * @param thread_parameters parameter structure for passing info to the thread.
+ */
 void *ad_thread_handle_requests(void *thread_parameters)
 {
     void *request = NULL;

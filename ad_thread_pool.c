@@ -4,12 +4,21 @@
 #include "ad_thread_pool.h"
 #include "ad_server.h"
 
+/* Constructs and populates a thread pool with the given mutex, 
+ * condition variable and the queue that is used for holding 
+ * received requests. Consists of a thread queue, a request queue
+ * and a thread pool maintainer thread. 
+ *
+ * @param   mutex          the mutex for the thread queue.
+ * @param   cond_var       the condition variable for the thread queue.
+ * @param   request_queue  pointer to the queue holding requests.
+ * @return                 constructed thread pool's pointer.
+ */
 ad_thread_pool *ad_thread_pool_construct(ad_thread_pool_mutex *mutex, 
                                          ad_thread_pool_cond *cond_var, 
                                          ad_queue *request_queue)
 {
     int i;
-    ad_thread_attr attr;
     ad_thread_pool *thread_pool = malloc(sizeof(ad_thread_pool));
 
     THREAD_QUEUE(thread_pool) = ad_queue_construct(mutex, cond_var);
@@ -24,6 +33,11 @@ ad_thread_pool *ad_thread_pool_construct(ad_thread_pool_mutex *mutex,
     return thread_pool;
 }
 
+/* Creates a thread for handling the requests and puts it
+ * into the thread queue of the thread pool
+ *
+ * @param thread_pool the thread pool for pushing the created thread.
+ */
 void ad_thread_pool_create_thread(ad_thread_pool *thread_pool)
 {
     ad_thread_attr attr;
@@ -41,6 +55,12 @@ void ad_thread_pool_create_thread(ad_thread_pool *thread_pool)
     ad_queue_push(THREAD_QUEUE(thread_pool), (void *) new_thread);
 }
 
+/* Pops a thread from the thread queue of the thread pool.
+ * Cancels the thread and frees allocated space.
+ *
+ * @param thread_pool the thread pool to delete a thread from.
+ * @return            integer indicating success or failure.
+ */
 int ad_thread_pool_delete_thread(ad_thread_pool *thread_pool)
 {
     ad_thread *thread = (ad_thread *) ad_queue_pop(THREAD_QUEUE(thread_pool));
@@ -54,11 +74,23 @@ int ad_thread_pool_delete_thread(ad_thread_pool *thread_pool)
     return 0;
 }
 
+/* Returns the count of threads currently in 
+ * the thread pool's thread queue
+ *
+ * @param thread_pool the thread pool to be queried.
+ * @return            count of the threads in the thread pool.
+ */
 int ad_thread_pool_get_thread_count(ad_thread_pool *thread_pool)
 {
     return ad_queue_get_node_count(THREAD_QUEUE(thread_pool));
 }
 
+/* Pops all the threads from the thread pool ,destructs
+ * the thread queue and frees the space allocated for the
+ * thread pool
+ *
+ * @param thread_pool the thread pool to be destructed.
+ */
 void ad_thread_pool_destruct(ad_thread_pool *thread_pool)
 {
     while(ad_thread_pool_delete_thread(thread_pool));
@@ -69,10 +101,13 @@ void ad_thread_pool_destruct(ad_thread_pool *thread_pool)
 
 /* Experimental!
  * Resizes the thread pool according to the server load.
+ *
+ * @param thread_pool_voidptr void pointer to the thread pool
+ *                            to be mainted.
  */
 void *ad_thread_pool_maintain(void *thread_pool_voidptr)
 {
-    int i, request_count, thread_count;
+    int request_count, thread_count;
     ad_thread_pool *thread_pool = (ad_thread_pool *) thread_pool_voidptr;
 
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);

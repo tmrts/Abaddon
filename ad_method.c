@@ -39,7 +39,13 @@ unsigned int _ad_method_char_lookup(register const char *str, register unsigned 
   return len + method_index_lookup[(unsigned char)str[0]];
 }
 
-/* Check if the given method is in the valid HTTP methods list */
+/* Determines whether a given string is a supported/to be supported 
+ * HTTP method or not.
+ *
+ * @param input the http method string to be tested.
+ * @return      if it's a valid method returns 1,
+ *              else returns 0.
+ */
 int ad_method_is_valid(register const char *input)
 {
     const char * const method_list[] =

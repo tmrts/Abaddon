@@ -22,13 +22,25 @@
 #include "ad_thread.h"
 #include "ad_thread_pool.h"
 
+/* Signal flag indicating the state of the server */
 volatile sig_atomic_t ad_server_terminating = 0;
 
+/* Returns the signal flag that is indicating 
+ * whether the server is terminating or not.
+ *
+ * @return value of the signal flag indicating 
+ *         termination status
+ */
 int ad_server_is_terminating(void)
 {
     return ad_server_terminating;
 }
 
+/* Acts as a SIGINT Handler. Turns on
+ * the server termination flag
+ *
+ * @param signum integer value of the received signal
+ */
 void ad_server_terminate(int signum) 
 { 
     ad_server_terminating = 1;
@@ -36,34 +48,36 @@ void ad_server_terminate(int signum)
     fflush(stdout);
 }
 
+/* Parses the http request and responds accordingly to 
+ * the connected client. Jumps out of the routine if 
+ * there are errors during the transactions with the client.
+ *
+ * @param client_socket file descriptor of the client socket
+ * @param error_jmp safe state to jump back to after encountering errors
+ */
 void ad_server_answer(int client_socket, jmp_buf error_jmp)
 {
     int requested_file;
     char path[512];
-    char buffer[4096];
-    ssize_t bytes_received, bytes_sent;
-    ad_http_request http_request = {
-        .method  = NULL,
-        .uri     = NULL,
-        .version = NULL,
-        .headers = NULL
-    };
+    char buffer[AD_HTTP_REQUEST_MAX_SIZE];
+    ad_http_request *http_request = NULL;
 
-    ad_response_receive(client_socket, buffer, 4096, error_jmp);
+    ad_response_receive(client_socket, buffer, AD_HTTP_REQUEST_MAX_SIZE, error_jmp);
 
-    ad_http_request_parse(&http_request, buffer);
+    http_request = ad_http_request_parse(buffer);
 
-    if(METHOD(&http_request) == NULL || !ad_method_is_valid(METHOD(&http_request)))
+    if(http_request == NULL || METHOD(http_request) == NULL || !ad_method_is_valid(METHOD(http_request)))
     {
         ad_response_send(client_socket, AD_RESPONSE_CLIENT_BAD_REQUEST, error_jmp);
     }
-    else if(strcasecmp(METHOD(&http_request), "GET"))
+    else if(ad_utils_strcmp_ic(METHOD(http_request), "GET"))
     {
+        ad_http_request_free(http_request);
         ad_response_send(client_socket, AD_RESPONSE_SERVER_NOT_IMPLEMENTED, error_jmp);
     }
-    else if(!strcasecmp(METHOD(&http_request),"GET"))
+    else if(!ad_utils_strcmp_ic(METHOD(http_request),"GET"))
     {
-        sprintf(path, "htdocs%s", URI(&http_request));
+        sprintf(path, "htdocs%s", URI(http_request));
         if(ad_utils_is_directory(path))
         {
             strcat(path, "index.html");
@@ -85,13 +99,18 @@ void ad_server_answer(int client_socket, jmp_buf error_jmp)
 
     shutdown(client_socket, SHUT_WR);
 
-    ad_response_receive(client_socket, buffer, 4096, error_jmp);
+    ad_response_receive(client_socket, buffer, AD_HTTP_REQUEST_MAX_SIZE, error_jmp);
 
     close(client_socket);
-
 }
 
-
+/* Listens for connections on the given port number.
+ * After accepting a connection, places it in to the 
+ * requests queue for further processing.
+ *
+ * @param   server_port port to be binded with the server socket.
+ * @return  EXIT_SUCCESS on a successful termination.
+ */
 int ad_server_listen(unsigned short int server_port)
 {
     int  server_socket = -1;

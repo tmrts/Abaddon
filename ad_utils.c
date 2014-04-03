@@ -4,14 +4,28 @@
 
 #include "ad_utils.h"
 
+/* Indicates whether a given path string is
+ * for a directory or not.
+ *
+ * @param path the path that is to be tested.
+ * @return     integer indicating the directory status.
+ */
 int ad_utils_is_directory(const char *path)
 {
     return (strrchr(path, '/') - path) == (strlen(path) - 1);
 }
 
+/* Compares two strings ignoring lowercase, uppercase.
+ *
+ * @param str1 first string to be compared.
+ * @param str2 second string to be compared.
+ * @return     if two strings are identical ignoring
+ *             cases of the strings, zero.
+ *             otherwise the value difference of
+ *             the first two different characters.
+ */
 int ad_utils_strcmp_ic(register const char *str1, register const char *str2)
 {
-    register unsigned int i;
     unsigned char c1, c2;
 
     while ( str1 && str2 )
@@ -25,10 +39,17 @@ int ad_utils_strcmp_ic(register const char *str1, register const char *str2)
     return c1 - c2;
 }
 
+/* Counts the number of occurrences of the given substring
+ * in the given string.
+ *
+ * @param str    the string to be searched on.
+ * @param substr the substring to be counted.
+ * @return       count of the occurrences of the substring.
+ */
 size_t ad_utils_substr_exists(const char *str, const char *substr)
 {
     size_t substr_count = 0;
-    const char *end, *p, *s = str;
+    const char *p, *s = str;
 
     while(s < str && (p = strstr(s, substr)))
     {
@@ -39,23 +60,28 @@ size_t ad_utils_substr_exists(const char *str, const char *substr)
     return substr_count;
 }
 
-char **ad_utils_split_str(const char *str, const char *delimiters)
+/* Splits the given string into tokens with the given delimiters.
+ *
+ * @param str    the string to be split.
+ * @param delims the delimiters to be used for splitting.
+ * @return       array of parts split according to the delimiters.
+ */
+char **ad_utils_split_str(const char *str, const char *delims)
 {
-    char *token;
-    char *src = malloc(sizeof(char) * (strlen(str) + 1));
-    char **tokens = malloc(sizeof(char *));
-    size_t i;
+    const char *p, *s = str;
+    char **tokens = NULL;
+    size_t i, token_len, offset;
 
-    strcpy(src, str);
-
-    token = strtok(src, delimiters);
-    tokens[0] = token;
-
-    for(i = 1; token = strtok(NULL, delimiters); i++)
+    for(i = 0; (p = strpbrk(s, delims)); i++)
     {
         tokens = realloc(tokens, sizeof(char *) * (i + 2));
 
-        tokens[i] = token;
+        token_len = p - s;
+        tokens[i] = malloc(sizeof(char) * (token_len + 1));
+
+        strncpy(tokens[i], s, token_len);
+
+        s = p + 1;
     }
 
     tokens[i + 1] = NULL; 
