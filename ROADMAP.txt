@@ -1,5 +1,4 @@
 The following is a list of goals to be accomplished for Abaddon.
-
 [HTTP Support]
     + Implement the remaining HTTP methods.
     + Include HTTP/1.1 & HTTP/0.9 support.
@@ -13,6 +12,9 @@ The following is a list of goals to be accomplished for Abaddon.
 [Tests]
     + Clean unit-tests for production.
     + Develop automated load-tests.
+
+[Security]
+    + Implement client input security checks (forbidden URI, malformed headers, etc.)
 
 [Deployment]
     + Implement configuration support.

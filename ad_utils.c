@@ -70,21 +70,32 @@ char **ad_utils_split_str(const char *str, const char *delims)
 {
     const char *p, *s = str;
     char **tokens = NULL;
-    size_t i, token_len, offset;
+    size_t i, tkn_len;
 
-    for(i = 0; (p = strpbrk(s, delims)); i++)
+    if (str != NULL)
     {
-        tokens = realloc(tokens, sizeof(char *) * (i + 2));
+        for (i = 0; (p = strpbrk(s, delims)); i++)
+        {
+            tokens = realloc(tokens, sizeof(char *) * (i + 3));
 
-        token_len = p - s;
-        tokens[i] = malloc(sizeof(char) * (token_len + 1));
+            tkn_len = p - s;
+            tokens[i] = malloc(sizeof(char) * (tkn_len + 1));
 
-        strncpy(tokens[i], s, token_len);
+            strncpy(tokens[i], s, tkn_len);
+            tokens[i][tkn_len] = '\0';
 
-        s = p + 1;
+            s = p + 1;
+        }
+
+        /* Copy the last token */
+        tkn_len = strlen(str) - (s - str);
+        tokens[i] = malloc(sizeof(char) * (tkn_len + 1));
+
+        strncpy(tokens[i], s, tkn_len);
+        tokens[i][tkn_len] = '\0';
+
+        tokens[i + 1] = NULL; 
     }
-
-    tokens[i + 1] = NULL; 
 
     return tokens;
 }

@@ -7,7 +7,6 @@
 
 ad_http_header ad_http_request_parse_header(char *header_str) 
 {
-    /* Not Implemented Yet */
 }
 
 /* Parses the request received from client.
@@ -26,40 +25,41 @@ ad_http_request *ad_http_request_parse(char *request)
     size_t substr_len;
     ad_http_request *http_request = NULL;
 
-    if (request != NULL && strstr(request, "\r\n\r\n") != NULL && strlen(request) < 4096) 
+    if (request != NULL && strstr(request, "\r\n\r\n") != NULL && strlen(request) > strlen(CLRF)) 
     {
+        http_request = malloc(sizeof(ad_http_request));
+        HEADERS(http_request) = NULL;
         for (i = 0; strlen(request) > (src - request); i++)
         {
-            buffer = realloc(buffer, sizeof(char *) * (i + 3));
+            buffer = realloc(buffer, sizeof(char *) * (i + 2));
 
             end = strstr(src, CLRF);
             substr_len = end - src;
 
-            buffer[i] = malloc(sizeof(char) * (substr_len + 2));
+            buffer[i] = malloc(sizeof(char) * (substr_len + 1));
             strncpy(buffer[i], src, substr_len);
             /* Terminate string */
-            buffer[i][substr_len] = NULL_CHAR;
+            strcat(buffer[i], "\0");
 
             src = end + strlen(CLRF);
         }
         /* Terminate buffer */
-        buffer[i + 1] = NULL;
+        buffer[i] = NULL;
 
         /* Assumes that the sent requests consist of method, uri, version for the moment */
         /* TODO: support argnumber and version flow control (e.g. treat as HTTP/0.9 if only a method is sent) */
         /* Request Body */
         if (buffer[0])
         {
-            /*
             tokens = ad_utils_split_str(buffer[0], " ");
-            */
 
-            METHOD(http_request) = "GET";
+            METHOD(http_request) = tokens[0];
 
-            URI(http_request) = "/";
+            URI(http_request) = tokens[1];
 
-            VERSION(http_request) = "HTTP/1.0";
+            VERSION(http_request) = tokens[2];
 
+            free(tokens);
         }
 
         /* TODO: Implement for HTTP/1.1 */
@@ -68,6 +68,11 @@ ad_http_request *ad_http_request_parse(char *request)
         {
             ad_http_request_parse_header(buffer[i]);
         }
+        for (i = 0; buffer[i]; i++) 
+        {
+            free(buffer[i]);
+        }
+        free(buffer);
 
     }
 
@@ -81,6 +86,10 @@ ad_http_request *ad_http_request_parse(char *request)
 void ad_http_request_free(ad_http_request *http_request) 
 {
     size_t i;
+
+    free(METHOD(http_request));
+    free(URI(http_request));
+    free(VERSION(http_request));
 
     if(HEADERS(http_request))
     {

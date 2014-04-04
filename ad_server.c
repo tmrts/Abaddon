@@ -66,28 +66,32 @@ void ad_server_answer(int client_socket, jmp_buf error_jmp)
 
     http_request = ad_http_request_parse(buffer);
 
-    if(http_request == NULL || METHOD(http_request) == NULL || !ad_method_is_valid(METHOD(http_request)))
+    if (http_request == NULL || METHOD(http_request) == NULL || !ad_method_is_valid(METHOD(http_request)))
     {
+        ad_http_request_free(http_request);
         ad_response_send(client_socket, AD_RESPONSE_CLIENT_BAD_REQUEST, error_jmp);
     }
-    else if(ad_utils_strcmp_ic(METHOD(http_request), "GET"))
+    else if (ad_utils_strcmp_ic(METHOD(http_request), "GET"))
     {
         ad_http_request_free(http_request);
         ad_response_send(client_socket, AD_RESPONSE_SERVER_NOT_IMPLEMENTED, error_jmp);
     }
-    else if(!ad_utils_strcmp_ic(METHOD(http_request),"GET"))
+    else if (!ad_utils_strcmp_ic(METHOD(http_request),"GET"))
     {
         sprintf(path, "htdocs%s", URI(http_request));
-        if(ad_utils_is_directory(path))
+        if (ad_utils_is_directory(path))
         {
             strcat(path, "index.html");
         }
 
-        if((requested_file = open(path,O_RDONLY)) == 0)
+        ad_http_request_free(http_request);
+
+        if ((requested_file = open(path, O_RDONLY)) == -1)
         {
+            perror("requested_file");
             ad_response_send(client_socket, AD_RESPONSE_CLIENT_NOT_FOUND, error_jmp);
         }
-        else
+        else 
         {
             ad_response_send(client_socket, AD_RESPONSE_HTTP_OK, error_jmp);
 
@@ -95,6 +99,7 @@ void ad_server_answer(int client_socket, jmp_buf error_jmp)
 
             close(requested_file);
         }
+
     }
 
     shutdown(client_socket, SHUT_WR);
