@@ -1,8 +1,9 @@
 #ifndef AD_HTTP_REQUEST_H
 #define AD_HTTP_REQUEST_H
 
-#define NULL_CHAR '\0';
 #define CLRF "\r\n"
+#define NULL_CHAR '\0';
+#define AD_HTTP_REQUEST_MAX_SIZE 4096
 
 typedef struct {
     char *name;
@@ -27,6 +28,8 @@ typedef struct {
 int ad_http_request_is_valid(ad_http_request request);
 
 ad_http_request *ad_http_request_parse(char *request);
+
+void ad_http_request_parse_header(ad_http_request *http_request, char *header_str) ;
 
 void ad_http_request_free(ad_http_request *http_request);
 

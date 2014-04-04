@@ -5,10 +5,6 @@
 #include "ad_method.h"
 #include "ad_utils.h"
 
-ad_http_header ad_http_request_parse_header(char *header_str) 
-{
-}
-
 /* Parses the request received from client.
  *
  * @param   request http request string
@@ -36,6 +32,7 @@ ad_http_request *ad_http_request_parse(char *request)
             substr_len = end - src;
 
             buffer[i] = malloc(sizeof(char) * (substr_len + 1));
+            /* TODO: Write a safe strncpy */
             strncpy(buffer[i], src, substr_len);
             /* Terminate string */
             buffer[i][substr_len] = '\0';
@@ -65,7 +62,7 @@ ad_http_request *ad_http_request_parse(char *request)
         /* Header Fields */
         for (i = 1; buffer[i]; i++)
         {
-            ad_http_request_parse_header(buffer[i]);
+            ad_http_request_parse_header(http_request, buffer[i]);
         }
         for (i = 0; buffer[i]; i++) 
         {

@@ -1,0 +1,6 @@
+htdocs*
+
+*~
+.*~
+*.out
+*.swap
