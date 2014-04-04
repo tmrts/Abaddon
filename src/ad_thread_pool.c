@@ -118,7 +118,7 @@ void ad_thread_pool_destruct(ad_thread_pool *thread_pool)
     free(thread_pool);
 }
 
-/* Experimental!
+/* Experimental. Not finished yet!
  * Resizes the thread pool according to the server load.
  *
  * @param thread_pool_voidptr void pointer to the thread pool
