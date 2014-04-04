@@ -88,7 +88,7 @@ void ad_server_answer(int client_socket, jmp_buf error_jmp)
 
         if ((requested_file = open(path, O_RDONLY)) == -1)
         {
-            perror("requested_file");
+            perror(path);
             ad_response_send(client_socket, AD_RESPONSE_CLIENT_NOT_FOUND, error_jmp);
         }
         else 

@@ -29,17 +29,16 @@ ad_http_request *ad_http_request_parse(char *request)
     {
         http_request = malloc(sizeof(ad_http_request));
         HEADERS(http_request) = NULL;
-        for (i = 0; strlen(request) > (src - request); i++)
+        for (i = 0; (end = strstr(src, CLRF)); i++)
         {
             buffer = realloc(buffer, sizeof(char *) * (i + 2));
 
-            end = strstr(src, CLRF);
             substr_len = end - src;
 
             buffer[i] = malloc(sizeof(char) * (substr_len + 1));
             strncpy(buffer[i], src, substr_len);
             /* Terminate string */
-            strcat(buffer[i], "\0");
+            buffer[i][substr_len] = '\0';
 
             src = end + strlen(CLRF);
         }
