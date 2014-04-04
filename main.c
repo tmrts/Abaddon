@@ -1,8 +1,13 @@
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "ad_server.h"
 
 /* Example Abaddon usage */
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) 
+{
+    /* 9229 is the default port of Abaddon */
+    int port = atoi(argv[1])? : 9229;
 
-    /* Abaddon will listen on port 8098 */
-    return ad_server_listen(7948);
+    return ad_server_listen(port);
 }
