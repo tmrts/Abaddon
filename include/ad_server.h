@@ -17,22 +17,22 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#ifndef AD_SERVER_H
+#define AD_SERVER_H
 
-#include "ad_wrapper.h"
+#include <setjmp.h>
 
-void system_error(const char *error_msg)
-{
-    perror(error_msg);
-    exit(EXIT_FAILURE);
-}
+#define AD_SERVER_CONNECTION_BACKLOG 128
+#define AD_SERVER_SOCKET_READ_TIMEOUT_SECONDS 10
+#define AD_SERVER_SOCKET_WRITE_TIMEOUT_SECONDS 10
 
-int check_error(int return_value, char *func_name)
-{
-    if(return_value == -1)
-        errno = return_value;
-        system_error(func_name);
-    return return_value;
-}
+int ad_server_is_terminating(void);
+
+/* SIGINT handler */
+void ad_server_terminate(int signum);
+
+int  ad_server_listen(unsigned short int server_port);
+
+void ad_server_answer(int client_socket, jmp_buf error_jmp);
+
+#endif

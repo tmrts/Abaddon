@@ -17,22 +17,15 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#ifndef AD_UTILS_H
+#define AD_UTILS_H
 
-#include "ad_wrapper.h"
+int ad_utils_strcmp_ic(register const char *str1, register const char *str2);
 
-void system_error(const char *error_msg)
-{
-    perror(error_msg);
-    exit(EXIT_FAILURE);
-}
+int ad_utils_is_directory(const char *path);
 
-int check_error(int return_value, char *func_name)
-{
-    if(return_value == -1)
-        errno = return_value;
-        system_error(func_name);
-    return return_value;
-}
+size_t ad_utils_substr_exists(const char *str, const char *substr);
+
+char **ad_utils_split_str(const char *str, const char *delimiters);
+
+#endif

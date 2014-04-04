@@ -17,22 +17,39 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#ifndef AD_HTTP_REQUEST_H
+#define AD_HTTP_REQUEST_H
 
-#include "ad_wrapper.h"
+#define CLRF "\r\n"
+#define NULL_CHAR '\0';
+#define AD_HTTP_REQUEST_MAX_SIZE 4096
 
-void system_error(const char *error_msg)
-{
-    perror(error_msg);
-    exit(EXIT_FAILURE);
-}
+typedef struct {
+    char *name;
+    char *field;
+}ad_http_header;
 
-int check_error(int return_value, char *func_name)
-{
-    if(return_value == -1)
-        errno = return_value;
-        system_error(func_name);
-    return return_value;
-}
+#define NAME(h) ((h) -> name)
+#define FIELD(h) ((h) -> field)
+
+typedef struct {
+    char *method;
+    char *uri;
+    char *version;
+    ad_http_header **headers;
+}ad_http_request;
+
+#define METHOD(r)   ((r) -> method)
+#define URI(r)      ((r) -> uri)
+#define VERSION(r)  ((r) -> version)
+#define HEADERS(r)  ((r) -> headers)
+
+int ad_http_request_is_valid(ad_http_request request);
+
+ad_http_request *ad_http_request_parse(char *request);
+
+void ad_http_request_parse_header(ad_http_request *http_request, char *header_str) ;
+
+void ad_http_request_free(ad_http_request *http_request);
+
+#endif

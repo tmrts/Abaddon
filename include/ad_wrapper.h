@@ -17,22 +17,20 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#ifndef AD_WRAPPER_H
+#define AD_WRAPPER_H
+#include <sys/socket.h>
 
-#include "ad_wrapper.h"
+void system_error(const char *error_msg);
 
-void system_error(const char *error_msg)
-{
-    perror(error_msg);
-    exit(EXIT_FAILURE);
-}
+void kill_server(int return_value, char *func_name);
 
-int check_error(int return_value, char *func_name)
-{
-    if(return_value == -1)
-        errno = return_value;
-        system_error(func_name);
-    return return_value;
-}
+int Socket(int family, int type, int protocol);
+
+int Bind(int sockfd, const struct sockaddr *myaddr, socklen_t addrlen);
+
+int Listen(int sockfd, int backlog);
+
+int Accept(int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen);
+
+#endif

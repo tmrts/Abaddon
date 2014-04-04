@@ -17,22 +17,17 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#ifndef AD_METHOD_H
+#define AD_METHOD_H
 
-#include "ad_wrapper.h"
+#define _MIN_HASH_VALUE 3
+#define _MAX_HASH_VALUE 12
+#define _MIN_METHOD_LENGTH 3
+#define _MAX_METHOD_LENGTH 7
 
-void system_error(const char *error_msg)
-{
-    perror(error_msg);
-    exit(EXIT_FAILURE);
-}
+unsigned int _ad_method_char_lookup(register const char *str, register unsigned int len);
 
-int check_error(int return_value, char *func_name)
-{
-    if(return_value == -1)
-        errno = return_value;
-        system_error(func_name);
-    return return_value;
-}
+int ad_method_is_valid(register const char *input);
+
+#endif
+
