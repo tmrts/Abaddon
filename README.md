@@ -8,11 +8,11 @@ while the thread pool threads handle the queued requests.
 
 Installation
 =======
-'''bash
+```bash
 git clone https://github.com/TamerTas/Abaddon
 make abaddon_compile
 make abaddon
-'''
+```
 
 Usage
 =======
