@@ -2,14 +2,14 @@ Abaddon HTTP Server
 =======
 
 Abaddon is HTTP server written in C using thread pool pattern.
-Currently only GET method is supported. Main thread listens for connections
-and queues the client for handling after the connection has been accepted
+Currently the only supported method is GET. Main thread listens for connections
+and queues the clients for handling after the connection has been accepted
 while the thread pool threads handle the queued requests.
 
 Installation
 =======
 ```bash
-git clone https://github.com/TamerTas/Abaddon
+git clone https://github.com/tamertas/abaddon
 make abaddon_compile
 ```
 
