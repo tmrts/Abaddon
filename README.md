@@ -20,9 +20,8 @@ Then, use the command below to start Abaddon.
 ```bash
 make abaddon PORT={Port_of_Choice}
 ```
-errors encountered during the execution will be logged
+Errors encountered during the execution will be logged
 in bin/log.txt
-
 To use Abaddon in your code all you have to do is call
 ad_server_listen with a valid port number argument.
 
