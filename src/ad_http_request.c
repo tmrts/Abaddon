@@ -117,4 +117,9 @@ void ad_http_request_free(ad_http_request *http_request)
     free(http_request);
 }
 
+/* Parses the given HTTP request headers
+ *
+ * @param http_request ad_http_request structure to store the header
+ * @param header_str   the HTTP request header to parse
+ */
 void ad_http_request_parse_header(ad_http_request *http_request, char *header_str) {}
