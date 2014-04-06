@@ -8,18 +8,18 @@ while the thread pool threads handle the queued requests.
 
 Installation
 =======
-'''bash
+```bash
 git clone https://github.com/TamerTas/Abaddon
 make abaddon_compile
-'''
+```
 
 Usage
 =======
 Place the website you want to host in htdocs folder.
 Then, use the command below to start Abaddon.
-'''bash
+```bash
 make abaddon PORT={Port_of_Choice}
-'''
+```
 errors encountered during the execution will be logged
 in bin/log.txt
 
