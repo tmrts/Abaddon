@@ -22,7 +22,7 @@ abaddon_compile:
 	$(CC) $(SRC) $(FLAGS) $(LIB_FLAGS)
 
 abaddon:
-	bin/abaddon $(PORT) 2> bin/abaddon_log.txt
+	bin/abaddon $(PORT) 2> bin/error_log.txt
 
 cgdb_debug:
 	mkdir -p dbg
