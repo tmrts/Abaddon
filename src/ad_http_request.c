@@ -24,7 +24,7 @@
 #include "ad_method.h"
 #include "ad_utils.h"
 
-/* Parses the request received from client.
+/* Parses the HTTP request received from client.
  *
  * @param   request http request string
  * @return  returns either NULL(not a legal HTTP request) 
@@ -116,3 +116,5 @@ void ad_http_request_free(ad_http_request *http_request)
 
     free(http_request);
 }
+
+void ad_http_request_parse_header(ad_http_request *http_request, char *header_str) {}

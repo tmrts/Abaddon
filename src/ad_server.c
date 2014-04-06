@@ -175,7 +175,11 @@ int ad_server_listen(unsigned short int server_port)
     server_addr.sin_family = AF_INET; 
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY); 
 
-    bind(server_socket, (struct sockaddr *) &server_addr, server_len);
+    if((bind(server_socket, (struct sockaddr *) &server_addr, server_len)) == -1)
+    {
+        perror("Abaddon HTTP server couldn't start");
+        return EXIT_FAILURE;
+    }
 
     listen(server_socket, AD_SERVER_CONNECTION_BACKLOG);
     printf("Abaddon HTTP server is listening on port %d\n", server_port);

@@ -1,6 +1,7 @@
 ABADDON = abaddon
 FOLDERS = bin dbg
 CC = gcc
+SRC = ./src/*.c -I ./src/include/
 LIB_FLAGS = -pthread
 DEBUG_FLAGS = -g -O0 -o dbg/abaddon_dbg
 EXTRA_FLAGS = -Wall -Wextra
@@ -14,20 +15,22 @@ clear:
 
 cppcheck:
 	mkdir -p dbg
-	cppcheck *.c > dbg/lint_log.txt
+	cppcheck $(SRC) > dbg/lint_log.txt
 	
-abaddon:
+abaddon_compile:
 	mkdir -p bin
-	$(CC) $(FLAGS) $(LIB_FLAGS) *.c
+	$(CC) $(SRC) $(FLAGS) $(LIB_FLAGS)
+
+abaddon:
 	bin/abaddon $(PORT) 2> bin/abaddon_log.txt
 
 cgdb_debug:
 	mkdir -p dbg
-	$(CC) $(DEBUG_FLAGS) $(EXTRA_FLAGS) $(LIB_FLAGS) *.c > dbg/compile_log.txt
+	$(CC) $(SRC) $(DEBUG_FLAGS) $(EXTRA_FLAGS) $(LIB_FLAGS) > dbg/compile_log.txt
 	cgdb dbg/abaddon_dbg --args $(PORT)
 
 valgrind_debug:
 	mkdir -p dbg
-	$(CC) $(DEBUG_FLAGS) $(LIB_FLAGS) *.c
+	$(CC) $(SRC) $(DEBUG_FLAGS) $(LIB_FLAGS)
 	valgrind $(VALGRIND_FLAGS) dbg/abaddon_dbg $(PORT) 2> dbg/valgrind_log.txt
 
