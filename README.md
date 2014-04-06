@@ -15,7 +15,8 @@ make abaddon_compile
 
 Usage
 =======
-To start Abaddon use the command below
+Place the website you want to host in htdocs folder.
+Then, use the command below to start Abaddon.
 '''bash
 make abaddon PORT={Port_of_Choice}
 '''
