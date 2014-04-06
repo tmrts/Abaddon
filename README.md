@@ -21,7 +21,7 @@ Then, use the command below to start Abaddon.
 make abaddon PORT={Port_of_Choice}
 ```
 Errors encountered during the execution will be logged
-in bin/log.txt
+in bin/error_log.txt
 To use Abaddon in your code all you have to do is call
 ad_server_listen with a valid port number argument.
 
